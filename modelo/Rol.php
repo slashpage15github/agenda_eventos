@@ -70,9 +70,24 @@ if (class_exists('Rol')!=true){
         }
 
     
-        public function actualizar( $obj)
+        public function actualizar($obj)
         {
-            // TODO implement here
+            $sql="update rol set ";
+            $sql.="tipo ="."'".$obj->getTipo()."'";
+            $sql.=" where id_rol='".$obj->getId_rol()."'";
+
+            //echo $sql;
+            $this->set_sql($sql);
+            $this->db_conn->set_charset('utf8');
+            mysqli_query($this->db_conn, $this->db_query) or die (mysqli_error($this->db_conn));
+
+            if (mysqli_affected_rows($this->db_conn) == 1){
+                $actualizado=1;
+            }else{
+                $actualizado=0;
+            }
+            unset($obj);
+            return $actualizado;
         }
 
     
@@ -94,15 +109,48 @@ if (class_exists('Rol')!=true){
         }
 
     
-        public function rolPor_Id( $id)
+        public function rolPor_Id($id)
         {
-            // TODO implement here
+            $id=$this->db_conn->real_escape_string($id);
+            $sql="select * from rol where id_rol=$id";
+            $this->set_sql($sql);
+            $result=mysqli_query($this->db_conn,$this->db_query) or die (mysqli_error($this->db_conn));
+
+            $total_regs=mysqli_num_rows($result);
+            $obj_detalle=null;
+
+            if ($total_regs==1){
+                $renglon=mysqli_fetch_assoc($result);
+                $obj_detalle=new Rol(
+                    $renglon["id_rol"],
+                    $renglon["tipo"]
+                );
+            }
+            return  $obj_detalle;
         }
 
     
         public function lista_roles()
         {
-            // TODO implement here
+            $sql="select * from rol";
+            $this->set_sql($sql);
+            $rs=mysqli_query($this->db_conn,$this->db_query) or die (mysqli_error($this->db_conn));
+            $total_roles=mysqli_num_rows($rs);
+            $obj_lista=null;
+
+            if ($total_roles>0){
+                $i=0;
+                while ($renglon = mysqli_fetch_assoc($rs)){
+                    $obj_lista= new Rol(
+                        $renglon["id_rol"],
+                        $renglon["tipo"]                        
+                    );
+                    $i++;
+                    $lista[$i]=$obj_lista;
+                    unset($obj_lista);
+                }
+                return $lista;
+            }
         }
 
     }
